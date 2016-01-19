@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------------
 # Name:        Log Reader 1.2
-# Purpose:      Reads log files and intelligently determines if the process
+# Purpose:      Reads log files and determines if the process
 #               documented by the log succeeded!
 #               Supports files with .log extension.
 #
-# Author:      Nicholas "Smoyd" Offer
+# Author:      Nicholas Offer
 #
 # Created:     30/04/2015
 # Copyright:   (c) Nicholas Offer 2015
@@ -12,7 +12,7 @@
 # Changelist:   - 05/05/2015 - Added custom file path option. Input when program
 #               is run from the command prompt. If no path is input, searches
 #               current directory.
-#               - 05/1602015 - Updated comments
+#               - 05/16/2015 - Updated comments
 #-------------------------------------------------------------------------------
 import string
 import os
@@ -26,18 +26,16 @@ def in_list(item, list1):
 
     return False
 
-# Prints an errro message and the given log that failed.
-# In progress: send an email with the log file as the message body using SMTP
-def email_log(log_path):
+# Prints an error message and the given log that failed.
+def fail_log(log_path):
     with open(log_path) as current_log:
         message = current_log.read()
 
-    # In progress: send a message with SMTP here
     print("Process failed! Log:")
     print(message)
 
 # Checks if any words in the last line of the given log indicate a failure.
-# Runs email_log if failed and prints a success message if not
+# Runs fail_log if failed and prints a success message if not
 def read_logs(log_path):
     pass_list = ["success", "succeeded", "passed", "complete", "completed"
     , "finished"]
@@ -53,7 +51,7 @@ def read_logs(log_path):
         for word in last_line.split(" "):
             word = word.lower()
             if (in_list(word, fail_list)):
-                email_log(log_path)
+                fail_log(log_path)
             elif (in_list(word, pass_list)):
                 print("The process succeeded.")
 
