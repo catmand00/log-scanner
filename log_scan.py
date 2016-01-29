@@ -13,15 +13,19 @@
 #               is run from the command prompt. If no path is input, searches
 #               current directory.
 #               - 05/16/2015 - Updated comments
+#               - 01/29/2016 - Fail keywords now read from text file
 #-------------------------------------------------------------------------------
 import string
 import os
 import sys
+import re
 
-# Returns True if item is within list1, False otherwise
+# Searches for any instance of item in any string element of list1
+# Returns True if item is found as a substring of an element of list1,
+# False otherwise
 def in_list(item, list1):
     for thing in list1:
-        if (item == thing):
+        if (re.search(thing, item) is not None):
             return True
 
     return False
@@ -31,16 +35,21 @@ def fail_log(log_path):
     with open(log_path) as current_log:
         message = current_log.read()
 
-    print("Process failed! Log:")
+    print("Process logged in {0} failed!".format(log_path))
+    print("Log contents:\n-----")
     print(message)
+    print("-----")
 
 # Checks if any words in the last line of the given log indicate a failure.
 # Runs fail_log if failed and prints a success message if not
-def read_logs(log_path):
-    pass_list = ["success", "succeeded", "passed", "complete", "completed"
-    , "finished"]
-
-    fail_list = ["fail", "failed", "abort", "aborted", "error", "errors"]
+def read_log(log_path):
+    
+    # Read the list of fail keywords
+    fail_list = [];
+    with open("fail_keywords.txt") as failFile:
+        for word in failFile:
+            # Cut the last character (newline)
+            fail_list.append(word[:len(word)-1])
 
     with open(log_path) as logFile:
         fullLog = []
@@ -52,10 +61,12 @@ def read_logs(log_path):
             word = word.lower()
             if (in_list(word, fail_list)):
                 fail_log(log_path)
-            elif (in_list(word, pass_list)):
-                print("The process succeeded.")
+                logFile.close()
+                return 1
 
+        print "The process logged in {0} succeeded".format(log_path)
         logFile.close()
+        return 0
 
 # Returns the last extension on a given file name (string).
 # Eg. get_extension(sample.txt.avi.jpg) returns ".jpg"
@@ -79,10 +90,14 @@ def scan_files():
     for (dirpath, dirnames, filenames) in os.walk(directory):
         f.extend(filenames)
         break
-
+    
+    numFails = 0
     for log_file in f:
         if (get_extension(log_file) == '.log'):
-            read_logs(log_file)
-    print("Done files.")
+            numFails += read_log(log_file)
+    print("Done scanning files. Found {0} failure{1}.".format(
+       numFails,
+       "" if numFails == 1 else "s"
+    ))
 
 scan_files()
