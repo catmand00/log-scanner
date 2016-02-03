@@ -46,7 +46,7 @@ def read_log(log_path):
     
     # Read the list of fail keywords
     fail_list = [];
-    with open("fail_keywords.txt") as failFile:
+    with open("fail_keywords.lst") as failFile:
         for word in failFile:
             # Cut the last character (newline)
             fail_list.append(word[:len(word)-1])
